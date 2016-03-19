@@ -1,7 +1,7 @@
 library(pracma)
 
 rm(list = ls(all = T))
-setwd("C:/Users/Hussein/repo2/Myth clusters")
+setwd("C:/Users/Hussein/repo2/Myth-clusters")
 X <- read.table(file = "data2.csv", header = T, sep = ",")
 data <- read.table(file = "data2.csv", header = T, sep = ",")
 X <- as.matrix(data)
@@ -28,3 +28,4 @@ for(i in 1:nrow(X)){
 }
 
 data$cluster <- mins
+X <- as.matrix(data)
