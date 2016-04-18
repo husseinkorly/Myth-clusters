@@ -1,15 +1,16 @@
+#Loading libraries
 library(plot3D)
 library(scatterplot3d)
 library(car)
-
 library(pracma)
+
 rm(list = ls(all = T))
 
 ############################
-# current working directory
+# Loading dataset
 ############################
-#setwd("C:/Users/Krishna/Desktop/CSC522_datascience/Project")
 X <- read.table(file = "data.csv", header = T, sep = ",")
+
 
 kmeans <- function(X, k) {
 
@@ -20,10 +21,6 @@ kmeans <- function(X, k) {
 	iteration <- 0
 
 	while(1) {
-		show(iteration)
-		show("Centroids values")
-		show(cents_values)
-
 		if( iteration != 0) {
 			X <- X[, -(ncol(X))]
 		}
@@ -34,11 +31,9 @@ kmeans <- function(X, k) {
 		clID <- as.matrix(apply( temp, 1, which.min))
 		colnames(clID)  <- c("clID")
 		X <- cbind(X, clID)
-		show(X)
 
 		updated_cents <- data.frame()
 		t <- as.data.frame(X)
-		show(is.matrix(X))
 
 		for(i in 1:k){
 			updated_cents <- rbind(updated_cents , colMeans(t[t$clID==i,]))
@@ -50,8 +45,9 @@ kmeans <- function(X, k) {
 		colnames(updated_cents) <- NULL
 
 		epsilon <- distmat(updated_cents, cents_values)
+
 		count <- 0
-		for(i in 1: k) {
+		for(i in 1: k){
 			if(epsilon[i, i] > .005){
 				cents_values <- updated_cents
 				iteration <- iteration + 1
@@ -61,16 +57,19 @@ kmeans <- function(X, k) {
 				count <- count + 1
 			}
 		}
+
 		if( count == k) {
-			cat("Total number of stabilized centroids = ", count, "\n")
 			return (result <- list(clusterID = clID, finalCent = cents_values, numIter = iteration))
 		}
 	}
 }
 
+
 kmpp <- function(X, numclusters) {
+
 	n <- nrow(X)
 	ce[1] <<- sample(1:n, 1)
+
 	for (i in 2:numclusters) {
 		dm <- distmat(X, X[ce, ])
 		pr <- apply(dm, 1, min); pr[ce] <- 0
@@ -79,8 +78,9 @@ kmpp <- function(X, numclusters) {
 	return(ce)
 }
 
-#TODO 
+
 plotDataAndCentroids <- function(X, cents_values, k, dimension) {
+
 	plot(X[, -ncol(X)], main = "Cluster Distributions", sub = " kmeans clustering")
 	start <- 15
 	for(i in 1:k) {
@@ -91,6 +91,39 @@ plotDataAndCentroids <- function(X, cents_values, k, dimension) {
 	}
 
 	points(cents_values, col = "blue", pch =8, cex = 2)
+
 	if(dimension == 3)
-	scatterplotMatrix(~length + width + Height | clID, data=X, main="clusters", smoother=FALSE, reg.line = FALSE, diagonal = "histogram", ellipse = TRUE)
+	scatterplotMatrix(~length + width + height | clID, data=X, main="clusters", smoother=FALSE, reg.line = FALSE, diagonal = "histogram", ellipse = TRUE)
+}
+
+
+calculateSSE <- function(X, cents_values, k) {
+
+	clusterSSE <- data.frame()
+	for(i in 1:k){
+		centroid <- as.vector(cents_values[i,])
+		clusterSubset <- as.matrix(subset(X[, -ncol(X)], X$clID == i))
+		sumerror <- distmat(clusterSubset, centroid)
+		resultRow <- c(i, colSums(sumerror))
+		clusterSSE <- rbind(resultRow, clusterSSE)
+	}
+	colnames(clusterSSE) <- c("clusterID","clusterSSE")
+	SSEMeasuresTotal <- as.matrix(colSums(as.matrix(clusterSSE$clusterSSE)))
+	colnames(SSEMeasuresTotal) <- c("totalSSE")
+	return(result <- list(clusterSSEmeasure = clusterSSE, totalSSE = SSEMeasuresTotal))
+}
+
+plotTotalSSE <- function(kmin, kmax, X){
+	pointsToplot <- data.frame()
+	for( i in kmin: kmax) {
+		results <- kmeans(X, i)
+		Xnew <- cbind(X, results$clusterID)
+		pointy <- calculateSSE(Xnew, results$finalCent, i )$totalSSE
+		resultRow <- c(i, pointy)
+		pointsToplot <- rbind(resultRow, pointsToplot)
+	}
+
+	colnames(pointsToplot) <- c("K value", "SSE")
+	plot(pointsToplot, main = "Basic Elbow Plot for k values", type = "o", col="blue")
+
 }
