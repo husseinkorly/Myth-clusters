@@ -1,4 +1,4 @@
-![alt tag](https://github.ncsu.edu/hakoprly/myth-clusters/blob/master/img/4877fa6b-53e4-4473-bac7-d55a6b82a43e.png)
+![alt tag](https://github.com/husseinkorly/Myth-clusters/blob/master/img/4877fa6b-53e4-4473-bac7-d55a6b82a43e.png)
 
 Cluster analysis is an important tool for unsupervised learning. Determining the number of clusters K is a difficult problem. Our goal is to explore the different ways which are currently used to determine the optimal number of clusters in k-means.
 
